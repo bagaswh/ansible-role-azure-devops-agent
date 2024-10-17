@@ -101,9 +101,17 @@
 
 - name: Set proxy
   set_fact:
-    agent_cmd_args: "{{ agent_cmd_args }} + ['--proxyurl \\'{{ az_devops_proxy_url }}\\'', '--proxyusername \\'{{ az_devops_proxy_username }}\\'', '--proxypassword \\'{{ az_devops_proxy_password }}\\'']"
+    agent_cmd_args: "{{ agent_cmd_args | combine(['--proxyurl \\'{{ az_devops_proxy_url }}\\'', '--proxyusername \\'{{ az_devops_proxy_username }}\\'', '--proxypassword \\'{{ az_devops_proxy_password }}\\'']) }}"
   when:
     - az_devops_proxy_url is defined
+    - az_devops_proxy_url != None
+
+# - name: Typeof
+#   fail:
+#     msg: |
+#       agent_cmd_args: {{ agent_cmd_args | type_debug }}
+#       agent_cmd_args: {{ agent_cmd_args }}
+#       resource_agent_cmd_args: {{ resource_agent_cmd_args | type_debug }}
 
 - name: Download and unarchive
   unarchive:
@@ -166,6 +174,12 @@
   when:
     - az_devops_agent_role == 'deployment'
     - (not service_is_installed) or reconfigure_or_replace
+
+# - name: Typeof
+#   fail:
+#     msg: |
+#       agent_cmd_args: {{ agent_cmd_args | type_debug }}
+#       resource_agent_cmd_args: {{ resource_agent_cmd_args | type_debug }}
 
 - name: Configure agent as an environment resource
   command: "{{ (agent_cmd_args + resource_agent_cmd_args) | join(' ') }}"
