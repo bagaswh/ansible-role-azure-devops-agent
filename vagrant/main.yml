@@ -1,0 +1,36 @@
+---
+- hosts: ansible-test
+
+- hosts: ansible-test
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Install acl
+      become: true
+      apt:
+        name: acl
+        state: present
+        update_cache: true
+
+    - name: Create group {{ az_devops_agent_group }}
+      group:
+        name: "{{ az_devops_agent_group }}"
+        state: present
+      become: true
+
+    - name: Create user {{ az_devops_agent_user }}
+      user:
+        name: "{{ az_devops_agent_user }}"
+        groups:
+          - "{{ az_devops_agent_group }}"
+          - sudo
+        append: true
+        comment: "Azure DevOps Agent"
+        shell: /bin/bash
+        create_home: true
+      become: true
+
+    - name: Include role
+      include_role:
+        name: agent
